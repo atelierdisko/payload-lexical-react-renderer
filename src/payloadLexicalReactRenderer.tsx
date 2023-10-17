@@ -161,8 +161,12 @@ export const defaultElementRenderers: PayloadLexicalReactRendererProps["elementR
       );
     },
     list: (element) => {
-      return (
-        <ul style={getElementStyle<"list">(element)}>{element.children}</ul>
+      return React.createElement(
+        element.tag,
+        {
+          style: getElementStyle<"list">(element),
+        },
+        element.children
       );
     },
     listItem: (element) => {
