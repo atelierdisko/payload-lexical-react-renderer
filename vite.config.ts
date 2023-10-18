@@ -10,7 +10,7 @@ export default defineConfig({
       // Could also be a dictionary or array of multiple entry points
       entry: resolve(__dirname, "src/payloadLexicalReactRenderer.tsx"),
       name: "payloadLexicalReactRenderer",
-      formats: ["es", "umd"],
+      formats: ["es", "cjs"],
       // the proper extensions will be added
       fileName: "payload-lexical-react-renderer",
     },

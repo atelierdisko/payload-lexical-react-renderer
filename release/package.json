@@ -1,6 +1,6 @@
 {
   "name": "@atelier-disko/payload-lexical-react-renderer",
-  "version": "0.0.4",
+  "version": "0.0.3",
   "type": "module",
   "types": "src/payloadLexicalReactRenderer.d.ts",
   "scripts": {
@@ -39,10 +39,12 @@
   "files": [
     "dist",
     "package.json",
-    "README.md"
+    "package-lock.json",
+    "README.md",
+    "src/payloadLexicalReactRenderer.d.ts"
   ],
   "exports": {
-    "types": "./dist/types.d.ts",
+    "types": "./dist/payloadLexicalReactRenderer.d.ts",
     "import": "./dist/payload-lexical-react-renderer.js",
     "require": "./dist/payload-lexical-react-renderer.cjs"
   },
