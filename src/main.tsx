@@ -1,7 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { PayloadLexicalReactRenderer } from "./payloadLexicalReactRenderer";
-import { PayloadLexicalReactRendererProps } from "./types";
+import {
+  PayloadLexicalReactRenderer,
+  PayloadLexicalReactRendererProps,
+} from "./payloadLexicalReactRenderer";
 
 const content: PayloadLexicalReactRendererProps["content"] = {
   root: {

@@ -1,8 +1,7 @@
 {
   "name": "@atelier-disko/payload-lexical-react-renderer",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "type": "module",
-  "types": "src/payloadLexicalReactRenderer.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -29,7 +28,8 @@
     "lint-staged": "^15.0.1",
     "prettier": "^3.0.3",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "vite-plugin-dts": "^3.6.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": "eslint --cache --fix",
@@ -41,10 +41,13 @@
     "package.json",
     "README.md"
   ],
+  "types": "./dist/index.d.ts",
   "exports": {
-    "types": "./dist/types.d.ts",
-    "import": "./dist/payload-lexical-react-renderer.js",
-    "require": "./dist/payload-lexical-react-renderer.cjs"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/payload-lexical-react-renderer.es.js",
+      "require": "./dist/dist/payload-lexical-react-renderer.umd.js"
+    }
   },
   "keywords": [
     "payload",
