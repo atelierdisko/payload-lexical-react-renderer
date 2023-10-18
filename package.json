@@ -2,6 +2,7 @@
   "name": "@atelier-disko/payload-lexical-react-renderer",
   "version": "0.0.3",
   "type": "module",
+  "types": "src/payloadLexicalReactRenderer.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -38,7 +39,8 @@
     "dist",
     "package.json",
     "package-lock.json",
-    "README.md"
+    "README.md",
+    "src/payloadLexicalReactRenderer.d.ts"
   ],
   "keywords": [
     "payload",
