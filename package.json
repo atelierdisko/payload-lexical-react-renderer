@@ -1,6 +1,6 @@
 {
   "name": "@atelier-disko/payload-lexical-react-renderer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,7 @@
     "prepare": "husky install",
     "typecheck": "tsc"
   },
-  "dependencies": {
+  "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
