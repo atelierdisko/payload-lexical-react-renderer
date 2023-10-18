@@ -1,6 +1,6 @@
 {
-  "name": "@atelierdisko/payload-lexical-react-renderer",
-  "version": "0.0.1",
+  "name": "@atelier-disko/payload-lexical-react-renderer",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -33,5 +33,19 @@
   "lint-staged": {
     "*.{ts,tsx}": "eslint --cache --fix",
     "*.{js,css,md}": "prettier --write"
-  }
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "package-lock.json",
+    "README.md"
+  ],
+  "keywords": [
+    "payload",
+    "cms",
+    "typscript",
+    "lexical",
+    "react",
+    "richtext"
+  ]
 }
