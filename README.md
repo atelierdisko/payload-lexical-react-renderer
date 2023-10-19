@@ -8,69 +8,74 @@ A react component for rendering the lexical editor state to jsx.
 import {
   PayloadLexicalReactRenderer,
   PayloadLexicalReactRendererProps,
-} from "./payloadLexicalReactRenderer";
+} from "@atelier-disko/payload-lexical-react-renderer";
 
 function MyBlog() {
+  const content: PayloadLexicalReactRendererProps["content"] = await fetchLexicalEditorState();
 
-const content: PayloadLexicalReactRendererProps = fetchLexicalRichTextData();
-
-return (
+  return (
     <div>
-    <PayloadLexicalReactRenderer content={content} />
+      <PayloadLexicalReactRenderer content={content} />
     </div>
- );
+  );
 }
-
 ```
 
 Get started by passing your Lexical rich text data to the component. It ships with default renderers that will only apply the most basic styling.
 
-In order to customize the result, use the following props to pass your own renderer functions as an object:
-
 ### elementRenderers
 
-```js
-<PayloadLexicalReactRenderer /* ... */ elementRenderers={/* Your custom renderers */} />
-```
-
-To control how your frontend will render elements from your Payload CMS like headings, paragraphs or lists etc., pass your custom renderers to the elementRenderers prop like so:
+In order to customize the rendered result, use the `elementRenderers` prop to override the default renderers:
 
 ```js
-export const customElementRenderers: PayloadLexicalReactRendererProps["elementRenderers"] =
-  {
-    heading: (element) => <CustomText as={element.tag}>{element.children}</CustomText>,
-    /* Or like so: */
-    paragraph: (element) => return (
-        <p className={/* Your style */}>{element.children}</p>
+import {
+  PayloadLexicalReactRenderer,
+  defaultElementRenderers,
+} from "@atelier-disko/payload-lexical-react-renderer";
+
+<PayloadLexicalReactRenderer
+  content={content}
+  elementRenderers={{
+    ...defaultElementRenderers,
+    heading: (props) => {
+      const Component = props.tag;
+
+      return (
+        <Component style={{ color: "#0d26fc" }}>{props.children}</Component>
       );
-    /* ... */
-  }
+    },
+    paragraph: (props) => (
+      <p className={/* Your style */}>{props.children}</p>
+    );
+  }}
+/>;
 ```
 
 **Note**: Make sure to assign a renderer for each element type being used in your editor.
 
 ### renderMarks
 
-```js
-<PayloadLexicalReactRenderer /* ... */ renderMarks={/* Your custom renderers */} />
-```
-
-To control how your frontend will render text marks like bold, italic etc., add your own renderers:
+To customize rendering of text marks like bold, italic etc., add your own `renderMark` function:
 
 ```js
-export const customRenderMarks: PayloadLexicalReactRendererProps["renderMark"] =
-  (mark) => {
-    const style: CSSProperties = {};
+import { PayloadLexicalReactRenderer } from "@atelier-disko/payload-lexical-react-renderer";
 
+<PayloadLexicalReactRenderer
+  content={content}
+  renderMark={(mark) => {
     if (mark.bold) {
-      style.fontWeight = /* Your own style */;
-      /* Add more styles if needed */
+      return <strong>{mark.text}</strong>;
     }
 
-    /* ... */
+    if (mark.italic) {
+      return <em>{mark.text}</em>;
+    }
 
-    return <span style={style}>{mark.text}</span>;
-  };
+    // implement all other mark types
+
+    return <>{mark.text}</>;
+  }}
+/>;
 ```
 
 ### blockRenderers
@@ -78,11 +83,32 @@ export const customRenderMarks: PayloadLexicalReactRendererProps["renderMark"] =
 Payload allows you to re-use your custom blocks in its Lexical rich text editor. If your CMS is not using the BlocksFeature inside the editor, you don't need to pass anything here. If you do, make sure to pass a renderer for each block you integrated into your editor.
 
 ```js
+import {
+  BlockNode,
+  PayloadLexicalReactRenderer,
+} from "@atelier-disko/payload-lexical-react-renderer";
+
+type Intro = {
+  text: string;
+  position: "left" | "right";
+};
+
 <PayloadLexicalReactRenderer
-      /* ... */
-      blockRenderers={{
-        someBlock: (props: BlockNode<SomeBlock>) => <SomeBlockRenderer content={props.fields.data.content}/>
-        /* ... */
-      }}
-    />
+  content={content}
+  blockRenderers={{
+    intro: (props: BlockNode<Intro>) => (
+      <div
+        style={{
+          display: "flex",
+          alignSelf:
+            props.fields.data.position === "left"
+              ? "flex-start"
+              : "flex-end",
+        }}
+      >
+        {props.fields.data.text}
+      </div>
+    ),
+  }}
+/>
 ```
