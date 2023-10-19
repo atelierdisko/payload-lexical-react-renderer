@@ -1,5 +1,10 @@
 import React, { CSSProperties } from "react";
 
+type ValueOf<
+  ObjectType,
+  ValueType extends keyof ObjectType = keyof ObjectType,
+> = ObjectType[ValueType];
+
 export type AbstractNode<Type extends string> = {
   type: Type;
   version: number;
@@ -11,13 +16,16 @@ export type AbstractElementNode<Type extends string> = {
   indent: number;
 } & AbstractNode<Type>;
 
-export type BlockNode<BlockType = unknown> = {
+export type BlockNode<
+  BlockData extends Record<string, unknown>,
+  BlockType extends string,
+> = {
   fields: {
     data: {
       id: string;
       blockName: string;
-      blockType: string;
-    } & BlockType;
+      blockType: BlockType;
+    } & BlockData;
   };
 } & AbstractElementNode<"block">;
 
@@ -113,7 +121,6 @@ export type UploadNode<
 export type Node =
   | HeadingNode
   | ParagraphNode
-  | BlockNode
   | UploadNode
   | TextNode
   | LinkNode
@@ -122,35 +129,46 @@ export type Node =
   | QuoteNode
   | Linebreak;
 
-export type PayloadLexicalReactRendererProps = {
-  content: {
-    root: Root;
-  };
-  elementRenderers?: {
-    heading: (
-      props: { children: React.ReactNode } & Omit<HeadingNode, "children">
-    ) => React.ReactNode;
-    list: (
-      props: { children: React.ReactNode } & Omit<ListNode, "children">
-    ) => React.ReactNode;
-    listItem: (
-      props: { children: React.ReactNode } & Omit<ListItemNode, "children">
-    ) => React.ReactNode;
-    paragraph: (
-      props: { children: React.ReactNode } & Omit<ParagraphNode, "children">
-    ) => React.ReactNode;
-    quote: (
-      props: { children: React.ReactNode } & Omit<QuoteNode, "children">
-    ) => React.ReactNode;
-    link: (
-      props: { children: React.ReactNode } & Omit<LinkNode, "children">
-    ) => React.ReactNode;
-    linebreak: () => React.ReactNode;
-    upload: (props: UploadNode) => React.ReactNode;
-  };
-  renderMark?: (mark: Mark) => React.ReactNode;
+export type ElementRenderers = {
+  heading: (
+    props: { children: React.ReactNode } & Omit<HeadingNode, "children">
+  ) => React.ReactNode;
+  list: (
+    props: { children: React.ReactNode } & Omit<ListNode, "children">
+  ) => React.ReactNode;
+  listItem: (
+    props: { children: React.ReactNode } & Omit<ListItemNode, "children">
+  ) => React.ReactNode;
+  paragraph: (
+    props: { children: React.ReactNode } & Omit<ParagraphNode, "children">
+  ) => React.ReactNode;
+  quote: (
+    props: { children: React.ReactNode } & Omit<QuoteNode, "children">
+  ) => React.ReactNode;
+  link: (
+    props: { children: React.ReactNode } & Omit<LinkNode, "children">
+  ) => React.ReactNode;
+  linebreak: () => React.ReactNode;
+  upload: (props: UploadNode) => React.ReactNode;
+};
+
+export type RenderMark = (mark: Mark) => React.ReactNode;
+
+export type PayloadLexicalReactRendererContent = {
+  root: Root;
+};
+
+export type PayloadLexicalReactRendererProps<
+  Blocks extends { [key: string]: Record<string, unknown> },
+> = {
+  content: PayloadLexicalReactRendererContent;
+  elementRenderers?: ElementRenderers;
+  renderMark?: RenderMark;
   blockRenderers?: {
-    [key: string]: (props: BlockNode) => React.ReactNode;
+    [BlockName in Extract<keyof Blocks, string>]?: (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      props: BlockNode<any, BlockName>
+    ) => React.ReactNode;
   };
 };
 
@@ -181,107 +199,107 @@ function getElementStyle<Type extends string>({
   return style;
 }
 
-export const defaultElementRenderers: PayloadLexicalReactRendererProps["elementRenderers"] =
-  {
-    heading: (element) => {
-      return React.createElement(
-        element.tag,
-        {
-          style: getElementStyle<"heading">(element),
-        },
-        element.children
-      );
-    },
-    list: (element) => {
-      return React.createElement(
-        element.tag,
-        {
-          style: getElementStyle<"list">(element),
-        },
-        element.children
-      );
-    },
-    listItem: (element) => {
-      return (
-        <li style={getElementStyle<"listitem">(element)}>{element.children}</li>
-      );
-    },
-    paragraph: (element) => {
-      return (
-        <p style={getElementStyle<"paragraph">(element)}>{element.children}</p>
-      );
-    },
-    link: (element) => (
-      <a
-        href={element.fields.url}
-        target={element.fields.newTab ? "_blank" : "_self"}
-        style={getElementStyle<"link">(element)}
-      >
-        {element.children}
-      </a>
-    ),
-    quote: (element) => (
-      <blockquote style={getElementStyle<"quote">(element)}>
-        {element.children}
-      </blockquote>
-    ),
-    linebreak: () => <br />,
-    upload: (element) => {
-      if (element.value.mimeType?.includes("image")) {
-        return <img src={element.value.url} alt={element.value.alt} />;
-      }
-    },
-  };
-
-export const defaultRenderMark: PayloadLexicalReactRendererProps["renderMark"] =
-  (mark) => {
-    const style: CSSProperties = {};
-
-    if (mark.bold) {
-      style.fontWeight = "bold";
+export const defaultElementRenderers: ElementRenderers = {
+  heading: (element) => {
+    return React.createElement(
+      element.tag,
+      {
+        style: getElementStyle<"heading">(element),
+      },
+      element.children
+    );
+  },
+  list: (element) => {
+    return React.createElement(
+      element.tag,
+      {
+        style: getElementStyle<"list">(element),
+      },
+      element.children
+    );
+  },
+  listItem: (element) => {
+    return (
+      <li style={getElementStyle<"listitem">(element)}>{element.children}</li>
+    );
+  },
+  paragraph: (element) => {
+    return (
+      <p style={getElementStyle<"paragraph">(element)}>{element.children}</p>
+    );
+  },
+  link: (element) => (
+    <a
+      href={element.fields.url}
+      target={element.fields.newTab ? "_blank" : "_self"}
+      style={getElementStyle<"link">(element)}
+    >
+      {element.children}
+    </a>
+  ),
+  quote: (element) => (
+    <blockquote style={getElementStyle<"quote">(element)}>
+      {element.children}
+    </blockquote>
+  ),
+  linebreak: () => <br />,
+  upload: (element) => {
+    if (element.value.mimeType?.includes("image")) {
+      return <img src={element.value.url} alt={element.value.alt} />;
     }
+  },
+};
 
-    if (mark.italic) {
-      style.fontStyle = "italic";
-    }
+export const defaultRenderMark: RenderMark = (mark) => {
+  const style: CSSProperties = {};
 
-    if (mark.underline) {
-      style.textDecoration = "underline";
-    }
+  if (mark.bold) {
+    style.fontWeight = "bold";
+  }
 
-    if (mark.strikethrough) {
-      style.textDecoration = "line-through";
-    }
+  if (mark.italic) {
+    style.fontStyle = "italic";
+  }
 
-    if (mark.code) {
-      return <code>{mark.text}</code>;
-    }
+  if (mark.underline) {
+    style.textDecoration = "underline";
+  }
 
-    if (mark.highlight) {
-      return <mark style={style}>{mark.text}</mark>;
-    }
+  if (mark.strikethrough) {
+    style.textDecoration = "line-through";
+  }
 
-    if (mark.subscript) {
-      return <sub style={style}>{mark.text}</sub>;
-    }
+  if (mark.code) {
+    return <code>{mark.text}</code>;
+  }
 
-    if (mark.superscript) {
-      return <sup style={style}>{mark.text}</sup>;
-    }
+  if (mark.highlight) {
+    return <mark style={style}>{mark.text}</mark>;
+  }
 
-    if (Object.keys(style).length === 0) {
-      return <>{mark.text}</>;
-    }
+  if (mark.subscript) {
+    return <sub style={style}>{mark.text}</sub>;
+  }
 
-    return <span style={style}>{mark.text}</span>;
-  };
+  if (mark.superscript) {
+    return <sup style={style}>{mark.text}</sup>;
+  }
 
-export function PayloadLexicalReactRenderer({
+  if (Object.keys(style).length === 0) {
+    return <>{mark.text}</>;
+  }
+
+  return <span style={style}>{mark.text}</span>;
+};
+
+export function PayloadLexicalReactRenderer<
+  Blocks extends { [key: string]: Record<string, unknown> },
+>({
   content,
   elementRenderers = defaultElementRenderers,
   renderMark = defaultRenderMark,
   blockRenderers = {},
-}: PayloadLexicalReactRendererProps) {
+}: PayloadLexicalReactRendererProps<Blocks>) {
   const renderElement = React.useCallback(
     (node: Node, children?: React.ReactNode) => {
       if (!elementRenderers) {
@@ -371,7 +389,12 @@ export function PayloadLexicalReactRenderer({
   );
 
   const serialize = React.useCallback(
-    (children: Node[]): React.ReactNode[] | null =>
+    (
+      children: (
+        | Node
+        | BlockNode<ValueOf<Blocks>, Extract<keyof Blocks, string>>
+      )[]
+    ): React.ReactNode[] | null =>
       children.map((node, index) => {
         if (node.type === "text") {
           return (
@@ -380,19 +403,15 @@ export function PayloadLexicalReactRenderer({
         }
 
         if (node.type === "block") {
-          if (
-            typeof blockRenderers[node.fields.data.blockType] !== "function"
-          ) {
+          const renderer = blockRenderers[node.fields.data.blockType];
+
+          if (typeof renderer !== "function") {
             throw new Error(
               `Missing block renderer for block type '${node.fields.data.blockType}'`
             );
           }
 
-          return (
-            <React.Fragment key={index}>
-              {blockRenderers[node.fields.data.blockType](node)}
-            </React.Fragment>
-          );
+          return <React.Fragment key={index}>{renderer(node)}</React.Fragment>;
         }
 
         if (node.type === "linebreak" || node.type === "upload") {

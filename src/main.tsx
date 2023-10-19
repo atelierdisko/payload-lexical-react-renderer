@@ -1,17 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import {
-  BlockNode,
   PayloadLexicalReactRenderer,
-  PayloadLexicalReactRendererProps,
+  PayloadLexicalReactRendererContent,
 } from "./payloadLexicalReactRenderer";
 
-type Intro = {
-  text: string;
-  position: "left" | "right";
-};
-
-const content: PayloadLexicalReactRendererProps["content"] = {
+const content: PayloadLexicalReactRendererContent = {
   root: {
     type: "root",
     format: "",
@@ -796,24 +790,5 @@ const content: PayloadLexicalReactRendererProps["content"] = {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <PayloadLexicalReactRenderer content={content} />
-
-    <PayloadLexicalReactRenderer
-      content={content}
-      blockRenderers={{
-        intro: (props: BlockNode<Intro>) => (
-          <div
-            style={{
-              display: "flex",
-              alignSelf:
-                props.fields.data.position === "left"
-                  ? "flex-start"
-                  : "flex-end",
-            }}
-          >
-            {props.fields.data.text}
-          </div>
-        ),
-      }}
-    />
   </React.StrictMode>
 );

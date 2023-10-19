@@ -8,10 +8,11 @@ A react component for rendering the lexical editor state to jsx.
 import {
   PayloadLexicalReactRenderer,
   PayloadLexicalReactRendererProps,
+  PayloadLexicalReactRendererContent
 } from "@atelier-disko/payload-lexical-react-renderer";
 
 function MyBlog() {
-  const content: PayloadLexicalReactRendererProps["content"] = await fetchLexicalEditorState();
+  const content: PayloadLexicalReactRendererContent = await fetchLexicalEditorState();
 
   return (
     <div>
@@ -93,10 +94,12 @@ type Intro = {
   position: "left" | "right";
 };
 
-<PayloadLexicalReactRenderer
+ <PayloadLexicalReactRenderer<{
+    intro: Intro;
+  }>
   content={content}
   blockRenderers={{
-    intro: (props: BlockNode<Intro>) => (
+    intro: (props) => (
       <div
         style={{
           display: "flex",
