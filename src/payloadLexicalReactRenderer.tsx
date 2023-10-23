@@ -1,10 +1,5 @@
 import React, { CSSProperties } from "react";
 
-type ValueOf<
-  ObjectType,
-  ValueType extends keyof ObjectType = keyof ObjectType,
-> = ObjectType[ValueType];
-
 export type AbstractNode<Type extends string> = {
   type: Type;
   version: number;
@@ -166,8 +161,7 @@ export type PayloadLexicalReactRendererProps<
   renderMark?: RenderMark;
   blockRenderers?: {
     [BlockName in Extract<keyof Blocks, string>]?: (
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      props: BlockNode<any, BlockName>
+      props: BlockNode<Blocks[BlockName], BlockName>
     ) => React.ReactNode;
   };
 };
@@ -392,7 +386,8 @@ export function PayloadLexicalReactRenderer<
     (
       children: (
         | Node
-        | BlockNode<ValueOf<Blocks>, Extract<keyof Blocks, string>>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        | BlockNode<any, "blockName">
       )[]
     ): React.ReactNode[] | null =>
       children.map((node, index) => {

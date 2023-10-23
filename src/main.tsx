@@ -787,8 +787,34 @@ const content: PayloadLexicalReactRendererContent = {
   },
 };
 
+type Intro = {
+  text: string;
+  position: "left" | "right";
+};
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <PayloadLexicalReactRenderer content={content} />
+    <PayloadLexicalReactRenderer<{
+      intro: Intro;
+    }>
+      content={content}
+      blockRenderers={{
+        intro: (props) => {
+          return (
+            <div
+              style={{
+                display: "flex",
+                alignSelf:
+                  props.fields.data.position === "left"
+                    ? "flex-start"
+                    : "flex-end",
+              }}
+            >
+              {props.fields.data.position}
+            </div>
+          );
+        },
+      }}
+    />
   </React.StrictMode>
 );
