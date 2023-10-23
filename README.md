@@ -2,9 +2,17 @@
 
 A react component for rendering the lexical editor state to jsx.
 
+## Installation
+
+Install the latest version by running:
+
+```
+npm install @atelier-disko/payload-lexical-react-renderer
+```
+
 ## Usage
 
-```js
+```ts
 import {
   PayloadLexicalReactRenderer,
   PayloadLexicalReactRendererProps,

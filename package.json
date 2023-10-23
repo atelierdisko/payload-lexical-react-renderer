@@ -1,6 +1,6 @@
 {
   "name": "@atelier-disko/payload-lexical-react-renderer",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "A react component for rendering the lexical editor state to jsx",
   "type": "module",
   "scripts": {
