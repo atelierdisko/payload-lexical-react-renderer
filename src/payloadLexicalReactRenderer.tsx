@@ -59,13 +59,13 @@ export type LinkNode = {
         url: string;
       }
     | {
+        linkType: "internal";
+        newTab: boolean;
+        url: string;
         doc: {
           relationTo: string;
           value: unknown;
         };
-        linkType: "internal";
-        newTab: boolean;
-        url: string;
       };
 } & AbstractElementNode<"link">;
 
@@ -75,7 +75,7 @@ export type HeadingNode = {
 } & AbstractElementNode<"heading">;
 
 export type ParagraphNode = {
-  children: (TextNode | Linebreak)[];
+  children: (TextNode | Linebreak | LinkNode)[];
 } & AbstractElementNode<"paragraph">;
 
 export type ListItemNode = {
