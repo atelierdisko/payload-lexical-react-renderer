@@ -1,14 +1,22 @@
 import React, { CSSProperties } from "react";
 
 export type AbstractNode<Type extends string> = {
+  format?: "" | "start" | "center" | "right" | number;
   type: Type;
   version: number;
 };
 
 export type AbstractElementNode<Type extends string> = {
   direction: "ltr" | "rtl" | null;
-  format: "" | "center" | "right";
   indent: number;
+} & AbstractNode<Type>;
+
+export type AbstractTextNode<Type extends string> = {
+  detail: number; // what is this
+  format: "" | number;
+  mode: "normal"; // what is this
+  style: string;
+  text: string;
 } & AbstractNode<Type>;
 
 export type BlockNode<
@@ -23,6 +31,17 @@ export type BlockNode<
     } & BlockData;
   };
 } & AbstractElementNode<"block">;
+
+type UnknownBlockNode = {
+  fields: {
+    data: {
+      id: string;
+      blockName: string;
+      blockType: string;
+      [key: string]: unknown;
+    };
+  };
+} & AbstractNode<"block">;
 
 export type Root = {
   children: Node[];
@@ -40,15 +59,9 @@ export type Mark = {
   highlight?: boolean;
 };
 
-export type TextNode = {
-  detail: number; // what is this
-  format: number;
-  mode: "normal"; // what is this
-  style: string;
-  text: string;
-} & AbstractNode<"text">;
-
+export type TextNode = AbstractTextNode<"text">;
 export type Linebreak = AbstractNode<"linebreak">;
+export type Tab = AbstractTextNode<"tab">;
 
 export type LinkNode = {
   children: TextNode[];
@@ -69,13 +82,22 @@ export type LinkNode = {
       };
 } & AbstractElementNode<"link">;
 
+export type AutoLinkNode = {
+  children: TextNode[];
+  fields: {
+    linkType: "custom";
+    newTab?: boolean;
+    url: string;
+  };
+} & AbstractElementNode<"autolink">;
+
 export type HeadingNode = {
   tag: string;
   children: TextNode[];
 } & AbstractElementNode<"heading">;
 
 export type ParagraphNode = {
-  children: (TextNode | Linebreak)[];
+  children: (TextNode | Linebreak | Tab | LinkNode | AutoLinkNode)[];
 } & AbstractElementNode<"paragraph">;
 
 export type ListItemNode = {
@@ -118,11 +140,14 @@ export type Node =
   | ParagraphNode
   | UploadNode
   | TextNode
-  | LinkNode
   | ListNode
   | ListItemNode
   | QuoteNode
-  | Linebreak;
+  | Linebreak
+  | Tab
+  | LinkNode
+  | UnknownBlockNode
+  | AutoLinkNode;
 
 export type ElementRenderers = {
   heading: (
@@ -143,7 +168,11 @@ export type ElementRenderers = {
   link: (
     props: { children: React.ReactNode } & Omit<LinkNode, "children">
   ) => React.ReactNode;
+  autolink: (
+    props: { children: React.ReactNode } & Omit<AutoLinkNode, "children">
+  ) => React.ReactNode;
   linebreak: () => React.ReactNode;
+  tab: () => React.ReactNode;
   upload: (props: UploadNode) => React.ReactNode;
 };
 
@@ -231,12 +260,22 @@ export const defaultElementRenderers: ElementRenderers = {
       {element.children}
     </a>
   ),
+  autolink: (element) => (
+    <a
+      href={element.fields.url}
+      target={element.fields.newTab ? "_blank" : "_self"}
+      style={getElementStyle<"autolink">(element)}
+    >
+      {element.children}
+    </a>
+  ),
   quote: (element) => (
     <blockquote style={getElementStyle<"quote">(element)}>
       {element.children}
     </blockquote>
   ),
   linebreak: () => <br />,
+  tab: () => <br />,
   upload: (element) => {
     if (element.value.mimeType?.includes("image")) {
       return <img src={element.value.url} alt={element.value.alt} />;
@@ -307,6 +346,13 @@ export function PayloadLexicalReactRenderer<
         });
       }
 
+      if (node.type === "autolink" && node.fields) {
+        return elementRenderers.autolink({
+          ...node,
+          children,
+        });
+      }
+
       if (node.type === "heading") {
         return elementRenderers.heading({
           ...node,
@@ -346,6 +392,10 @@ export function PayloadLexicalReactRenderer<
         return elementRenderers.linebreak();
       }
 
+      if (node.type === "tab") {
+        return elementRenderers.tab();
+      }
+
       if (node.type === "upload") {
         return elementRenderers.upload(node);
       }
@@ -383,13 +433,7 @@ export function PayloadLexicalReactRenderer<
   );
 
   const serialize = React.useCallback(
-    (
-      children: (
-        | Node
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        | BlockNode<any, "blockName">
-      )[]
-    ): React.ReactNode[] | null =>
+    (children: Node[]): React.ReactNode[] | null =>
       children.map((node, index) => {
         if (node.type === "text") {
           return (
@@ -398,7 +442,9 @@ export function PayloadLexicalReactRenderer<
         }
 
         if (node.type === "block") {
-          const renderer = blockRenderers[node.fields.data.blockType];
+          const renderer = blockRenderers[node.fields.data.blockType] as (
+            props: unknown
+          ) => React.ReactNode;
 
           if (typeof renderer !== "function") {
             throw new Error(
@@ -409,11 +455,17 @@ export function PayloadLexicalReactRenderer<
           return <React.Fragment key={index}>{renderer(node)}</React.Fragment>;
         }
 
-        if (node.type === "linebreak" || node.type === "upload") {
+        if (
+          node.type === "linebreak" ||
+          node.type === "tab" ||
+          node.type === "upload"
+        ) {
           return (
             <React.Fragment key={index}>{renderElement(node)}</React.Fragment>
           );
         }
+
+        console.log(node);
 
         return (
           <React.Fragment key={index}>
