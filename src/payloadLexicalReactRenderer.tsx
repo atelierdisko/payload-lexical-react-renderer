@@ -465,8 +465,6 @@ export function PayloadLexicalReactRenderer<
           );
         }
 
-        console.log(node);
-
         return (
           <React.Fragment key={index}>
             {renderElement(node, serialize(node.children))}
