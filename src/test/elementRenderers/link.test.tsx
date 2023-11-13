@@ -1,5 +1,5 @@
-import { render} from "@testing-library/react";
-import { describe } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import {
   PayloadLexicalReactRenderer,
   PayloadLexicalReactRendererContent,
@@ -22,7 +22,7 @@ const content: PayloadLexicalReactRendererContent = {
                 format: 0,
                 mode: "normal",
                 style: "",
-                text: "This",
+                text: "External",
                 type: "text",
                 version: 1,
               },
@@ -38,17 +38,6 @@ const content: PayloadLexicalReactRendererContent = {
               linkType: "custom",
             },
           },
-
-          {
-            detail: 0,
-            format: 0,
-            mode: "normal",
-            style: "",
-            text: " is an external link, and ",
-            type: "text",
-            version: 1,
-          },
-
           {
             children: [
               {
@@ -56,7 +45,7 @@ const content: PayloadLexicalReactRendererContent = {
                 format: 0,
                 mode: "normal",
                 style: "",
-                text: "this",
+                text: "Autolink",
                 type: "text",
                 version: 1,
               },
@@ -64,92 +53,12 @@ const content: PayloadLexicalReactRendererContent = {
             direction: "ltr",
             format: "",
             indent: 0,
-            type: "link",
+            type: "autolink",
             version: 1,
-
             fields: {
-              url: "https://",
-
-              doc: {
-                value: {
-                  id: "652808c5ce40f919f2cdadd1",
-                  firstName: "First",
-                  lastName: "Person",
-                  slug: "first-person",
-                  position: "CEO",
-                  email: "ceo@company.com",
-                  portrait: "65280888ce40f919f2cdadca",
-
-                  content: {
-                    root: {
-                      type: "root",
-                      format: "",
-                      indent: 0,
-                      version: 1,
-
-                      children: [
-                        {
-                          children: [
-                            {
-                              detail: 0,
-                              format: 0,
-                              mode: "normal",
-                              style: "",
-                              text: "Lorem ipsum",
-                              type: "text",
-                              version: 1,
-                            },
-                          ],
-                          direction: "ltr",
-                          format: "",
-                          indent: 0,
-                          type: "heading",
-                          version: 1,
-                          tag: "h2",
-                        },
-
-                        {
-                          children: [
-                            {
-                              detail: 0,
-                              format: 0,
-                              mode: "normal",
-                              style: "",
-                              text: "foo bar foo bar bar bar bar –– bar-bar-bar. ",
-                              type: "text",
-                              version: 1,
-                            },
-                          ],
-                          direction: "ltr",
-                          format: "",
-                          indent: 0,
-                          type: "paragraph",
-                          version: 1,
-                        },
-                      ],
-                      direction: "ltr",
-                    },
-                  },
-                  _status: "published",
-                  createdAt: "2023-10-12T14:55:01.823Z",
-                  updatedAt: "2023-10-12T14:55:01.823Z",
-                  fullName: "First Person",
-                },
-                relationTo: "people",
-              },
-              newTab: false,
-              linkType: "internal",
+              linkType: "custom",
+              url: "https://payloadcms.com/docs/getting-started/what-is-payload",
             },
-          },
-
-          {
-            detail: 0,
-            format: 0,
-            mode: "normal",
-            style: "",
-            text: " is an internal one. ",
-            type: "text",
-            version: 1,
           },
         ],
         direction: "ltr",
@@ -163,9 +72,7 @@ const content: PayloadLexicalReactRendererContent = {
   },
 };
 
-/** TODO: Extend link renderer (current is the default one) */
-
-describe("Testing custom heading renderers", async () => {
+describe("Testing custom link renderers", () => {
   render(
     <PayloadLexicalReactRenderer
       content={content}
@@ -175,6 +82,16 @@ describe("Testing custom heading renderers", async () => {
           <a
             href={element.fields.url}
             target={element.fields.newTab ? "_blank" : "_self"}
+            className="linkElement"
+          >
+            {element.children}
+          </a>
+        ),
+        autolink: (element) => (
+          <a
+            href={element.fields.url}
+            target={element.fields.newTab ? "_blank" : "_self"}
+            className="autoLinkElement"
           >
             {element.children}
           </a>
@@ -182,4 +99,48 @@ describe("Testing custom heading renderers", async () => {
       }}
     />
   );
+
+  screen.logTestingPlaygroundURL();
+
+  describe("Link renderer", () => {
+    const link = screen.getByRole("link", { name: "External" });
+
+    it("Should be a link with href value 'https://payloadcms.com/'", () => {
+      expect(link.getAttribute("href")).toBe("https://payloadcms.com/");
+    });
+
+    it("Should have a target attribute with value '_blank'", () => {
+      expect(link.getAttribute("target")).toBe("_blank");
+    });
+
+    it("Should have a className 'linkElement'", () => {
+      expect(link).toHaveClass("linkElement");
+    });
+
+    it("Should render 'External' as anchor text", () => {
+      expect(link).toHaveTextContent("External");
+    });
+  });
+
+  describe("Autolink renderer", () => {
+    const autoLink = screen.getByRole("link", { name: "Autolink" });
+
+    it("Should render a link with href value 'https://payloadcms.com/docs/getting-started/what-is-payload'", () => {
+      expect(autoLink.getAttribute("href")).toBe(
+        "https://payloadcms.com/docs/getting-started/what-is-payload"
+      );
+    });
+
+    it("Should have a target attribute with value '_self'", () => {
+      expect(autoLink.getAttribute("target")).toBe("_self");
+    });
+
+    it("Should have a className 'autoLinkElement'", () => {
+      expect(autoLink).toHaveClass("autoLinkElement");
+    });
+
+    it("Should render 'Autolink' as anchor text", () => {
+      expect(autoLink).toHaveTextContent("Autolink");
+    });
+  });
 });
