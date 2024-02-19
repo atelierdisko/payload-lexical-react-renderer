@@ -179,7 +179,7 @@ export type PayloadLexicalReactRendererContent = {
 };
 
 export type PayloadLexicalReactRendererProps<
-    Blocks extends { [key: string]: Record<string, unknown> },
+    Blocks extends { [key: string]: any },
 > = {
     content: PayloadLexicalReactRendererContent;
     elementRenderers?: ElementRenderers;
@@ -322,7 +322,7 @@ export const defaultRenderMark: RenderMark = (mark) => {
 };
 
 export function PayloadLexicalReactRenderer<
-    Blocks extends { [key: string]: Record<string, unknown> },
+    Blocks extends { [key: string]: any },
 >({
       content,
       elementRenderers = defaultElementRenderers,
