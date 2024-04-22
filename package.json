@@ -66,5 +66,6 @@
     "lexical",
     "react",
     "richtext"
-  ]
+  ],
+  "repository": "github:atelierdisko/payload-lexical-react-renderer"
 }
