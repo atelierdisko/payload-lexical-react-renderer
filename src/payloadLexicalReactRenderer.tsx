@@ -1,7 +1,7 @@
 import React, {CSSProperties} from "react";
 
 export type AbstractNode<Type extends string> = {
-    format?: "" | "start" | "center" | "right" | number;
+    format?: "" | "start" | "center" | "right" | "justify" | number;
     type: Type;
     version: number;
 };
@@ -103,7 +103,7 @@ export type ListItemNode = {
 
 export type ListNode = {
     tag: string;
-    listType: "number" | "bullet";
+    listType: "number" | "bullet" | "check";
     start: number;
     children: ListItemNode[];
 } & AbstractElementNode<"list">;
@@ -211,7 +211,7 @@ function getElementStyle<Type extends string>({
         style.marginLeft = `${indent * 20}px`;
     }
 
-    if (format === "right" || format === "center") {
+    if (format === "right" || format === "center" || format === "justify") {
         style.textAlign = format;
     }
 
