@@ -173,6 +173,7 @@ export type ElementRenderers = {
     tab: () => React.ReactNode;
     upload: (props: UploadNode) => React.ReactNode;
     horizontalRule: () => React.ReactNode;
+    [key: string]: (props: any) => React.ReactNode;
 };
 
 export type RenderMark = (mark: Mark) => React.ReactNode;
@@ -403,6 +404,10 @@ export function PayloadLexicalReactRenderer<
             if (node.type === "horizontalrule") {
                 return elementRenderers.horizontalRule();
             }
+            
+            if (Object.keys(elementRenderers).includes(node.type)) {
+                return elementRenderers[node.type](node);
+            }
 
             throw new Error(`Missing element renderer for node type '${node.type}'`);
         },
@@ -472,7 +477,7 @@ export function PayloadLexicalReactRenderer<
 
                 return (
                     <React.Fragment key={index}>
-                        {renderElement(node, serialize(node.children))}
+                        {renderElement(node, serialize(node.children || []))}
                     </React.Fragment>
                 );
             }),

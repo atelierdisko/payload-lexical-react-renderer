@@ -1,6 +1,6 @@
 {
   "name": "@atelier-disko/payload-lexical-react-renderer",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "A react component for rendering the lexical editor state to jsx",
   "type": "module",
   "scripts": {
@@ -14,8 +14,8 @@
     "test:ui": "vitest --ui"
   },
   "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.0.0 || ^19.0.0 || ^19.0.0-rc",
+    "react-dom": "^18.0.0 || ^19.0.0 || ^19.0.0-rc"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.4",
