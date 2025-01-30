@@ -170,6 +170,7 @@ export type ElementRenderers = {
     linebreak: () => React.ReactNode;
     tab: () => React.ReactNode;
     upload: (props: UploadNode) => React.ReactNode;
+    [key: string]: (props: any) => React.ReactNode;
 };
 
 export type RenderMark = (mark: Mark) => React.ReactNode;
@@ -394,6 +395,10 @@ export function PayloadLexicalReactRenderer<
 
             if (node.type === "upload") {
                 return elementRenderers.upload(node);
+            }
+
+            if (Object.keys(elementRenderers).includes(node.type)) {
+                return elementRenderers[node.type](node);
             }
 
             throw new Error(`Missing element renderer for node type '${node.type}'`);
