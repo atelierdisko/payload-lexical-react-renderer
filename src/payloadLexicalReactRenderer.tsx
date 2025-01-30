@@ -58,6 +58,7 @@ export type Mark = {
 export type TextNode = AbstractTextNode<"text">;
 export type Linebreak = AbstractNode<"linebreak">;
 export type Tab = AbstractTextNode<"tab">;
+export type HorizontalRule = AbstractNode<"horizontalrule">;
 
 export type LinkNode = {
     children: TextNode[];
@@ -93,7 +94,7 @@ export type HeadingNode = {
 } & AbstractElementNode<"heading">;
 
 export type ParagraphNode = {
-    children: (TextNode | Linebreak | Tab | LinkNode | AutoLinkNode)[];
+    children: (TextNode | Linebreak | Tab | LinkNode | AutoLinkNode | HorizontalRule)[];
 } & AbstractElementNode<"paragraph">;
 
 export type ListItemNode = {
@@ -143,7 +144,8 @@ export type Node =
     | Tab
     | LinkNode
     | UnknownBlockNode
-    | AutoLinkNode;
+    | AutoLinkNode
+    | HorizontalRule
 
 export type ElementRenderers = {
     heading: (
@@ -170,6 +172,7 @@ export type ElementRenderers = {
     linebreak: () => React.ReactNode;
     tab: () => React.ReactNode;
     upload: (props: UploadNode) => React.ReactNode;
+    horizontalRule: () => React.ReactNode;
     [key: string]: (props: any) => React.ReactNode;
 };
 
@@ -271,6 +274,7 @@ export const defaultElementRenderers: ElementRenderers = {
             {element.children}
         </blockquote>
     ),
+    horizontalRule: () => <hr/>,
     linebreak: () => <br/>,
     tab: () => <br/>,
     upload: (element) => {
@@ -397,6 +401,10 @@ export function PayloadLexicalReactRenderer<
                 return elementRenderers.upload(node);
             }
 
+            if (node.type === "horizontalrule") {
+                return elementRenderers.horizontalRule();
+            }
+            
             if (Object.keys(elementRenderers).includes(node.type)) {
                 return elementRenderers[node.type](node);
             }
@@ -459,7 +467,8 @@ export function PayloadLexicalReactRenderer<
                 if (
                     node.type === "linebreak" ||
                     node.type === "tab" ||
-                    node.type === "upload"
+                    node.type === "upload" ||
+                    node.type === "horizontalrule"
                 ) {
                     return (
                         <React.Fragment key={index}>{renderElement(node)}</React.Fragment>
